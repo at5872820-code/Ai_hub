@@ -1,1 +1,78 @@
 # Ai_hub
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Krishna AI Platform</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial; background:#0f172a; color:white; text-align:center; }
+    h1 { color:#38bdf8; }
+    button { padding:10px 20px; margin:10px; background:#38bdf8; border:none; cursor:pointer; }
+    input, textarea { width:80%; padding:10px; margin:10px; }
+    #response { margin-top:20px; }
+  </style>
+</head>
+
+<body>
+
+<h1>🚀 Krishna AI Platform</h1>
+
+<h2>AI Chat</h2>
+<textarea id="chatInput" placeholder="Ask something..."></textarea><br>
+<button onclick="chatAI()">Ask AI</button>
+<div id="response"></div>
+
+<h2>AI Image Generator</h2>
+<input type="text" id="imagePrompt" placeholder="Enter image prompt">
+<button onclick="generateImage()">Generate Image</button>
+<div id="imageResult"></div>
+
+<script>
+
+async function chatAI() {
+  const input = document.getElementById("chatInput").value;
+  document.getElementById("response").innerHTML = "Loading...";
+
+  const response = await fetch(
+    "https://api-inference.huggingface.co/models/google/flan-t5-large",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_HUGGINGFACE_API_KEY"
+      },
+      body: JSON.stringify({ inputs: input })
+    }
+  );
+
+  const data = await response.json();
+  document.getElementById("response").innerHTML = data[0]?.generated_text || "Error!";
+}
+
+async function generateImage() {
+  const prompt = document.getElementById("imagePrompt").value;
+  document.getElementById("imageResult").innerHTML = "Generating...";
+
+  const response = await fetch(
+    "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2",
+    {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer YOUR_HUGGINGFACE_API_KEY",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ inputs: prompt })
+    }
+  );
+
+  const blob = await response.blob();
+  const imageUrl = URL.createObjectURL(blob);
+
+  document.getElementById("imageResult").innerHTML =
+    `<img src="${imageUrl}" width="300"/>`;
+}
+
+</script>
+
+</body>
+</html>
